@@ -1,10 +1,6 @@
-skip 'broken'
-[!windows] skip 'Windows only'
-
 # test that chezmoi apply normalizes symlinks
-chezmoi apply
-#readlink $HOME/.symlink_forward_slash $HOME\.dir\file
-readlink $HOME/.symlink_backward_slash $HOME\.dir\file
+chezmoi apply $HOME${/}.symlink_forward_slash
+cmp $HOME/.symlink_forward_slash $HOME/.dir/file
 
 # test that the persistent state matches the actual state
 chezmoi diff
@@ -13,7 +9,5 @@ chezmoi verify
 
 -- home/user/.dir/file --
 # contents of .dir/file
--- xhome/user/.local/share/chezmoi/symlink_dot_symlink_forward_slash.tmpl --
+-- home/user/.local/share/chezmoi/symlink_dot_symlink_forward_slash.tmpl --
 {{ env "HOME" }}/.dir/file
--- home/user/.local/share/chezmoi/symlink_dot_symlink_backward_slash.tmpl --
-{{ env "HOME" }}\.dir\file

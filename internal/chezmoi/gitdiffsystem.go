@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"os/exec"
+	"runtime"
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
@@ -193,8 +194,11 @@ func (s *GitDiffSystem) WriteFile(filename AbsPath, data []byte, perm fs.FileMod
 
 // WriteSymlink implements System.WriteSymlink.
 func (s *GitDiffSystem) WriteSymlink(oldname string, newname AbsPath) error {
-	toData := append([]byte(oldname), '\n')
+	toData := append([]byte(normalizeLinkname(oldname)), '\n')
 	toMode := fs.ModeSymlink
+	if runtime.GOOS == "windows" {
+		toMode |= 0o666
+	}
 	if err := s.encodeDiff(newname, toData, toMode); err != nil {
 		return err
 	}
@@ -221,7 +225,7 @@ func (s *GitDiffSystem) encodeDiff(absPath AbsPath, toData []byte, toMode fs.Fil
 		if err != nil {
 			return err
 		}
-		fromData = []byte(fromDataStr)
+		fromData = append([]byte(fromDataStr), '\n')
 		fromMode = fromInfo.Mode()
 	default:
 		fromMode = fromInfo.Mode()
