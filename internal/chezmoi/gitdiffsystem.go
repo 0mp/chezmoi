@@ -205,24 +205,24 @@ func (s *GitDiffSystem) encodeDiff(absPath AbsPath, toData []byte, toMode fs.Fil
 	var fromData []byte
 	var fromMode fs.FileMode
 	switch fromInfo, err := s.system.Stat(absPath); {
-	case err == nil && fromInfo.Mode().IsRegular():
+	case errors.Is(err, fs.ErrNotExist):
+	case err != nil:
+		return err
+	case fromInfo.Mode().IsRegular():
 		fromData, err = s.system.ReadFile(absPath)
 		if err != nil {
 			return err
 		}
 		fromMode = fromInfo.Mode()
-	case err == nil && fromInfo.Mode().Type() == fs.ModeSymlink:
+	case fromInfo.Mode().Type() == fs.ModeSymlink:
 		fromDataStr, err := s.system.Readlink(absPath)
 		if err != nil {
 			return err
 		}
 		fromData = []byte(fromDataStr)
 		fromMode = fromInfo.Mode()
-	case err == nil:
-		fromMode = fromInfo.Mode()
-	case errors.Is(err, fs.ErrNotExist):
 	default:
-		return err
+		fromMode = fromInfo.Mode()
 	}
 
 	diffPatch, err := DiffPatch(s.trimPrefix(absPath), fromData, fromMode, toData, toMode)
