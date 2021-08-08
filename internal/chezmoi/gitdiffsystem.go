@@ -206,7 +206,7 @@ func (s *GitDiffSystem) WriteSymlink(oldname string, newname AbsPath) error {
 func (s *GitDiffSystem) encodeDiff(absPath AbsPath, toData []byte, toMode fs.FileMode) error {
 	var fromData []byte
 	var fromMode fs.FileMode
-	switch fromInfo, err := s.system.Stat(absPath); {
+	switch fromInfo, err := s.system.Lstat(absPath); {
 	case errors.Is(err, fs.ErrNotExist):
 	case err != nil:
 		return err
