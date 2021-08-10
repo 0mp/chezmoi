@@ -5,6 +5,8 @@ cmp $HOME/.symlink_forward_slash $HOME/.dir/file
 # test that the persistent state matches the actual state
 chezmoi diff
 ! stdout .
+chezmoi status
+! stdout .
 chezmoi verify
 
 -- home/user/.dir/file --
